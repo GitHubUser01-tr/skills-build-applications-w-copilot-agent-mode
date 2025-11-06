@@ -17,6 +17,20 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import UserViewSet, TeamViewSet, ActivityViewSet, WorkoutViewSet, LeaderboardViewSet, api_root
+import os
+from django.http import JsonResponse
+from django.urls import reverse
+
+# Vue utilitaire pour retourner l'URL complète de l'API
+def api_url_info(request):
+    codespace_name = os.environ.get('CODESPACE_NAME')
+    if codespace_name:
+        base_url = f"https://{codespace_name}-8000.app.github.dev"
+    else:
+        base_url = request.build_absolute_uri('/')[:-1]  # retire le slash final
+    return JsonResponse({
+        "api_base_url": f"{base_url}/api/"
+    })
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
@@ -29,4 +43,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', api_root, name='api-root'),
     path('api/', include(router.urls)),
+    path('api-url-info/', api_url_info, name='api-url-info'),
 ]
